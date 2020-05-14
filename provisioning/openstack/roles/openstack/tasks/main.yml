@@ -1,0 +1,117 @@
+---
+# tasks file for openstack
+- name: install lib
+  apt:
+    pkg:
+    - software-properties-common
+
+- name: add repo
+  apt_repository:
+    repo: ppa:deadsnakes/ppa
+    state: present
+  ignore_errors: yes
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes
+
+# - name: Install libreadline7 for libvirt-clients 
+#   apt:
+#     deb: http://de.archive.ubuntu.com/ubuntu/pool/main/r/readline/libreadline7_7.0-3_amd64.deb
+   
+# - name: Install libvirt0 for libvirt-clients 
+#   apt:
+#     deb: http://launchpadlibrarian.net/478387688/libvirt0_4.0.0-1ubuntu8.16_amd64.deb
+
+# - name: Install libvirt-clients 
+#   apt:
+#     deb: http://launchpadlibrarian.net/367124010/libvirt-clients_4.0.0-1ubuntu8_amd64.deb 
+
+- name: install libs
+  apt:
+    pkg:
+    - git 
+    - python3.7
+    - vim-gtk
+    - libxml2-dev
+    - libxslt1-dev
+    - libpq-dev
+    - python3.7-dev #python-dev
+    - python3.7-venv
+    - python3-software-properties
+    - python3-apt
+    - python-apt
+    - python-pip
+    - libsqlite3-dev
+    - libsystemd-dev # libsystemd-daemon-dev
+    - python-mysqldb
+    - qemu
+    - qemu-kvm
+    - qemu-utils
+    - libvirt-clients
+    - libvirt-bin 
+    - libvirt-daemon-system
+    - libvirt-dev 
+    - bridge-utils 
+    - virt-manager
+    state: latest
+
+- name: Correct python
+  alternatives:
+    name: python3
+    link: /usr/bin/python3
+    path: /usr/bin/python3.7
+
+- name: pip-install
+  pip:
+    name: 
+      - mysqlclient
+      - git-review
+      - tox
+  ignore_errors: yes
+
+- name: python package link 1
+  file:
+    src: "/usr/lib/python3/dist-packages/apt_pkg.cpython-36m-x86_64-linux-gnu.so"
+    dest: "/usr/lib/python3/dist-packages/apt_pkg.so"
+    state: link
+
+- name: python package link 2
+  file:
+    src: "/usr/lib/python3/dist-packages/gi/_gi.cpython-36m-x86_64-linux-gnu.so"
+    dest: "/usr/lib/python3/dist-packages/gi/_gi.so"
+    state: link
+
+- name: Add the user stack
+  user:
+    name: stack
+    comment: stack
+    shell: /bin/bash
+    home: /opt/stack
+
+- name: copy stack sudoer
+  copy:
+    src: "files/stack"
+    dest: /etc/sudoers.d/stack
+
+- name: clone devstack
+  become_user: stack
+  git:
+    repo: 'https://opendev.org/openstack/devstack'
+    dest: /opt/stack/devstack
+    version: stable/ussuri
+
+- name: copy local.conf
+  copy:
+    src: "files/local.conf"  
+    dest: /opt/stack/devstack/local.conf
+  become_user: stack
+
+- name: Create log dir
+  file:
+    path: opt/stack/logs
+    owner: stack
+    state: directory
+
+- name: go go openstack
+  shell: /opt/stack/devstack/stack.sh
+  become_user: stack

@@ -1,0 +1,6 @@
+---
+- name: openstack
+  hosts: openstack
+  become: yes
+  roles: 
+    - openstack

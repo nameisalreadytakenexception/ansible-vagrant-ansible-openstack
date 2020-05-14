@@ -1,0 +1,15 @@
+---
+# tasks file for vagrant_setup
+- name: install vagrant
+  apt:
+    pkg:
+    - vagrant
+    state: latest
+- name: vagrant up
+  command: vagrant up
+  args:
+    chdir: /home/hellen/supertask/
+- name: vagrant provision
+  command: vagrant provision
+  args:
+    chdir: /home/hellen/supertask/

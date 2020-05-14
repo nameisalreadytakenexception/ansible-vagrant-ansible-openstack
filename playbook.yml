@@ -1,0 +1,6 @@
+---
+- name: let's go vagrant
+  hosts: localhost
+  #become: yes
+  roles: 
+    - vagrant_setup
