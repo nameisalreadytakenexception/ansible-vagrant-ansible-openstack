@@ -10,3 +10,4 @@ well it's painful way
 
 4) ansible start nova_compute
 5) ansible install on nova_compute wordpress
+![](pic/openstack.png)
